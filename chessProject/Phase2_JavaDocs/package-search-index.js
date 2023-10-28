@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"chess"},{"l":"chessCode"},{"l":"dao"},{"l":"dataAccess"},{"l":"models"},{"l":"requests"},{"l":"results"},{"l":"services"}];updateSearchResults();
