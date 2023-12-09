@@ -6,46 +6,34 @@ import dataAccess.DataAccessException;
 import requests.JoinGameRequest;
 import results.JoinGameResult;
 
-/**
- * Class Creates models and uses Data Access Objects to join games
- */
 public class JoinGameService {
-    /**
-     * Joins a new game and receives server response
-     * @param request JoinGameRequest object with details for HTTP request
-     * @return JoinGameRequest Result with information from server
-     */
     public JoinGameResult joinGame(JoinGameRequest request, String authToken) {
         JoinGameResult result = new JoinGameResult();
         String username;
-        if (!new AuthDao().authorizeToken(authToken)) {
-            result.setErrorCode(401);
-            result.setMessage("Error Unauthorized");
-            return result;
-        }
-
         try {
-            username = new AuthDao().getUsernamefromToken(authToken);
-        }
-        catch (DataAccessException ex) {
-            JoinGameResult errorResult = new JoinGameResult();
-            errorResult.setErrorCode(500);
-            errorResult.setMessage(ex.getMessage());
-            return errorResult;
-        }
+            if (!new AuthDao().authorizeToken(authToken)) {
+                result.setErrorCode(401);
+                result.setMessage("Error Unauthorized");
+                return result;
+            }
 
-        try {
-            if (new GameDao().joinGame(request.getGameID(), username, request.getPlayerColor())) {
+            username = new AuthDao().getUsernameFromToken(authToken);
+            int joinReturnCode = new GameDao().joinGame(request.getGameID(), username, request.getPlayerColor());
+            if (joinReturnCode == 1) {
                 result.setErrorCode(200);
-            } else {
+            } else if (joinReturnCode == 0) {
                 result.setErrorCode(403);
-                result.setMessage("Error: Already Taken");
+                result.setMessage("Error: Color already taken");
+            }
+            else {
+                result.setErrorCode(400);
+                result.setMessage("Error: Bad Request");
             }
             return result;
         }
         catch (DataAccessException ex) {
             JoinGameResult errorResult = new JoinGameResult();
-            errorResult.setErrorCode(400);
+            errorResult.setErrorCode(500);
             errorResult.setMessage(ex.getMessage());
             return errorResult;
         }

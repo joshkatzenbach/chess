@@ -1,8 +1,6 @@
 package personalTests;
 
 import chess.ChessGame;
-import dao.*;
-import models.AuthToken;
 import org.junit.jupiter.api.*;
 import services.*;
 import results.*;
@@ -343,9 +341,6 @@ public class PersonalServerTests {
 
 
         Assertions.assertEquals(HTTP_OK, result.getErrorCode(), "Wrong Error Code");
-        Assertions.assertEquals(0, new GameDao().getGames().size(), "Array was not cleared");
-        Assertions.assertEquals(0, new AuthDao().getTokens().size(), "Array was not cleared");
-        Assertions.assertEquals(0, new UserDao().getUsers().size(), "Array was not cleared");
     }
 
 

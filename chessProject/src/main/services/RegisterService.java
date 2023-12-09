@@ -6,15 +6,7 @@ import results.RegisterResult;
 import dao.*;
 import models.*;
 
-/**
- * Class Creates models and uses Data Access Objects to add new user to database
- */
 public class RegisterService {
-    /**
-     * Adds new user to database and captures server response
-     * @param request RegisterRequest object with HTTP info
-     * @return RegisterResult object with info from server
-     */
     public RegisterResult register(RegisterRequest request) {
         RegisterResult result = new RegisterResult();
 
@@ -25,19 +17,23 @@ public class RegisterService {
         }
 
         try {
-            new UserDao().addUser(new User(request.getUsername(), request.getPassword(), request.getEmail()));
+            if (!new UserDao().addUser(new User(request.getUsername(), request.getPassword(), request.getEmail()))) {
+                result.setMessage("Error: Username taken");
+                result.setErrorCode(403);
+                return result;
+            }
+
+            AuthToken token = new AuthDao().generateToken(request.getUsername());
+            result.setErrorCode(200);
+            result.setUsername(token.getUsername());
+            result.setAuthToken(token.getAuthToken());
+            return result;
         }
         catch (DataAccessException ex) {
             RegisterResult errorResult = new RegisterResult();
             errorResult.setMessage(ex.getMessage());
-            errorResult.setErrorCode(403);
+            errorResult.setErrorCode(500);
             return errorResult;
         }
-
-        AuthToken token = new AuthDao().generateToken(request.getUsername());
-        result.setErrorCode(200);
-        result.setUsername(token.getUsername());
-        result.setAuthToken(token.getAuthToken());
-        return result;
     }
 }

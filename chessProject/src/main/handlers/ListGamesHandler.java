@@ -5,7 +5,6 @@ import results.ListGamesResult;
 import services.ListGamesService;
 import spark.Request;
 import spark.Response;
-import results.*;
 
 public class ListGamesHandler {
     public Object HandleRequest(Request req, Response res) {

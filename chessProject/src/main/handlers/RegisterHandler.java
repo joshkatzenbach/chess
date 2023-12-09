@@ -1,13 +1,10 @@
 package handlers;
 
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import requests.RegisterRequest;
 import results.RegisterResult;
 import services.RegisterService;
 import spark.*;
-
-import javax.xml.crypto.Data;
 
 public class RegisterHandler {
     public Object HandleRequest(Request req, Response res) {
