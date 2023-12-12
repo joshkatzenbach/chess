@@ -1,22 +1,82 @@
 package dao;
 
 import chess.ChessGame;
-import chessCode.AGame;
+import chess.ChessPiece;
+import chessCode.ChessBoardLayout;
+import chessCode.ChessPieceAdapter;
+import chessCode.GameInstance;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import models.Game;
 import dataAccess.*;
+import server.GameMembers;
+import server.WSServer;
 
-import javax.xml.crypto.Data;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
+
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
 
 public class GameDao {
 
     private static Connection conn;
 
-    public Game getGameDetails(int gameID) throws Exception {
+    public void updateGame(GameInstance game, int gameID) throws Exception {
+        var updateStatement = conn.prepareStatement("UPDATE gameTable SET game=? WHERE gameID=?");
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(ChessPiece.class, new ChessPieceAdapter());
+        Gson gson = builder.create();
+
+        updateStatement.setString(1, gson.toJson(game));
+        updateStatement.setInt(2, gameID);
+        updateStatement.executeUpdate();
+    }
+
+    public boolean verifyColor(ChessGame.TeamColor color, int gameID, String username) throws Exception{
+        java.sql.PreparedStatement queryStatement;
+        queryStatement = conn.prepareStatement("SELECT * FROM gameTable WHERE gameID=?");
+        queryStatement.setInt(1, gameID);
+        var rs = queryStatement.executeQuery();
+        if (rs.next()) {
+            if (color == WHITE) {
+                System.out.println(rs.getString("whiteUsername"));
+                return Objects.equals(rs.getString("whiteUsername"), username);
+            }
+            else if (color == BLACK) {
+                return Objects.equals(rs.getString("blackUsername"), username);
+            }
+            else {
+                throw new Exception("No Color included in colorTaken function");
+            }
+        }
+        else {
+            throw new Exception("GameID not located in database");
+        }
+    }
+
+    public void removeUser(ChessGame.TeamColor color, int gameID) throws Exception {
+        try {
+            java.sql.PreparedStatement updateStatement;
+            if (color == WHITE) {
+                updateStatement = conn.prepareStatement("UPDATE gameTable SET whiteUsername=NULL WHERE gameID=?");
+            } else {
+                updateStatement = conn.prepareStatement("UPDATE gameTable SET blackUsername=NULL WHERE gameID=?");
+            }
+
+            updateStatement.setInt(1, gameID);
+            updateStatement.executeUpdate();
+        }
+        catch (Exception ex) {
+            throw new DataAccessException("Could not access the database or gameID was not found");
+        }
+    }
+
+    public GameInstance getGameInstance(int gameID) throws Exception {
         var queryStatement = conn.prepareStatement("SELECT * FROM gameTable WHERE gameID=?");
         queryStatement.setInt(1, gameID);
         var rs = queryStatement.executeQuery();
@@ -29,7 +89,12 @@ public class GameDao {
             throw new DataAccessException("ERROR: GameID was not in table");
         }
 
-        return new Gson().fromJson(gameString, Game.class);
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(ChessPiece.class, new ChessPieceAdapter());
+        Gson gson = builder.create();
+
+
+        return gson.fromJson(gameString, GameInstance.class);
     }
     public int createGame(String gameName) throws DataAccessException {
         int idCounter = 0;
@@ -45,8 +110,21 @@ public class GameDao {
             var insertStatement = conn.prepareStatement("INSERT INTO gameTable (gameName, gameID, game) VALUES(?,?,?)");
             insertStatement.setString(1, gameName);
             insertStatement.setInt(2, ++idCounter);
-            insertStatement.setString(3, (String) new Gson().toJson(new AGame()));
+
+            GsonBuilder builder = new GsonBuilder();
+            builder.registerTypeAdapter(ChessPiece.class, new ChessPieceAdapter());
+            Gson gson = builder.create();
+
+            GameInstance gameToAdd = new GameInstance();
+            ChessBoardLayout boardToAdd = new ChessBoardLayout();
+            boardToAdd.resetBoard();
+            gameToAdd.setBoard(boardToAdd);
+            String gameString = gson.toJson(gameToAdd);
+
+            insertStatement.setString(3, gameString);
             insertStatement.executeUpdate();
+
+            WSServer.gameList.add(new GameMembers(idCounter));
             return idCounter;
         }
         catch (SQLException ex) {
@@ -92,7 +170,7 @@ public class GameDao {
             var rs = queryStatement.executeQuery();
             if (!rs.next()) {
                 return 2;
-            } else if (color == ChessGame.TeamColor.WHITE) {
+            } else if (color == WHITE) {
                 if (rs.getString("whiteUsername") == null) {
                     var insertStatement = conn.prepareStatement("UPDATE gameTable SET whiteUsername=? WHERE gameID=?");
                     insertStatement.setString(1, username);
@@ -102,7 +180,7 @@ public class GameDao {
                 } else {
                     return 0;
                 }
-            } else if (color == ChessGame.TeamColor.BLACK) {
+            } else if (color == BLACK) {
                 if (rs.getString("blackUsername") == null) {
                     var insertStatement = conn.prepareStatement("UPDATE gameTable SET blackUsername=? WHERE gameID=?");
                     insertStatement.setString(1, username);

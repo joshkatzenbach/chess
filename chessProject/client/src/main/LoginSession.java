@@ -1,5 +1,4 @@
 import chess.ChessGame;
-import chessCode.AChessBoard;
 import models.*;
 import requests.JoinGameRequest;
 import results.CreateGameResult;
@@ -84,17 +83,24 @@ public class LoginSession {
     }
     public boolean joinGame(String[] tokens) throws IOException, URISyntaxException {
         ChessGame.TeamColor teamColor = null;
+        Integer gameID;
         if (tokens.length > 3) {
             System.out.print(SET_TEXT_COLOR_RED);
             System.out.println("Invalid Input Syntax\n");
             return false;
         }
-        Integer gameID = currentGames.get(tokens[1]);
-        if (gameID == null) {
+        try {
+            gameID = currentGames.get(tokens[1]);
+            if (gameID == null) {
+                throw new Exception("Game not found");
+            }
+        }
+        catch (Exception ex) {
             System.out.print(SET_TEXT_COLOR_RED);
             System.out.print("Game not found. Have you listed the games yet?\n");
             return false;
         }
+
         JoinGameRequest request = new JoinGameRequest();
         request.setGameID(gameID);
 

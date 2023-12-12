@@ -10,11 +10,11 @@ public class Game {
     private String whiteUsername;
     private String blackUsername;
     private String gameName;
-    private AGame game;
+    private GameInstance game;
 
     public Game(String gameName) {
         this.gameName = gameName;
-        game = new AGame();
+        game = new GameInstance();
     }
     public Game() {};
     public int getGameID() {
@@ -49,11 +49,11 @@ public class Game {
         this.gameName = gameName;
     }
 
-    public AGame getGame() {
+    public GameInstance getGame() {
         return game;
     }
 
-    public void setGame(AGame game) {
+    public void setGame(GameInstance game) {
         this.game = game;
     }
 }

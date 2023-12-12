@@ -1,18 +1,30 @@
 package server;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.*;
 import handlers.*;
 
-import java.io.IOException;
+
 import java.sql.*;
+import java.util.ArrayList;
+
 import dao.*;
 import org.eclipse.jetty.websocket.api.Session;
+
+import javax.websocket.CloseReason;
 
 @WebSocket
 public class Server {
 
     private WSServer webSocketHandler;
+
+    private ArrayList<Session> sessions;
+
+    private final Object lock = new Object();
+//    private final Object lock2 = new Object();
+
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -21,9 +33,22 @@ public class Server {
 
     public Server() {
         webSocketHandler = new WSServer();
+        sessions = new ArrayList<Session>();
+
     }
     private void run() {
         initializeDatabase();
+
+        //DELETE THIS BEFORE TURNING IN
+        try {
+            new GameDao().clear();
+            new AuthDao().clear();
+            new UserDao().clear();
+        }
+        catch (Exception ex) {
+            System.out.println(ex.toString());
+            System.exit(1);
+        }
 
         Spark.port(8080);
         Spark.webSocket("/connect", Server.class);
@@ -39,8 +64,14 @@ public class Server {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
-        System.out.println("Arrived here");
-        webSocketHandler.handle(message, session);
+        try {
+            synchronized (lock) {
+                webSocketHandler.handle(message, session);
+            }
+        }
+        catch (Exception ex) {
+            System.out.println(ex.toString());
+        }
     }
 
 

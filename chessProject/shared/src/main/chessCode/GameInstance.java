@@ -9,15 +9,24 @@ import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
 import static chess.ChessPiece.PieceType.KING;
 
-public class AGame implements ChessGame {
+public class GameInstance implements ChessGame {
 
     //CHANGED THIS
-    private AChessBoard board;
+    private final ChessBoardLayout board;
     private TeamColor turnColor;
+    private boolean gameIsActive;
 
-    public AGame() {
-        board = new AChessBoard();
+    public GameInstance() {
+        board = new ChessBoardLayout();
         turnColor = WHITE;
+        gameIsActive = true;
+    }
+
+    public void endGame() {
+        gameIsActive = false;
+    }
+    public boolean gameActive() {
+        return gameIsActive;
     }
     @Override
     public TeamColor getTeamTurn() {
@@ -37,7 +46,7 @@ public class AGame implements ChessGame {
             return validMoves;
         }
 
-        ChessBoard oldBoard = new AChessBoard();
+        ChessBoardLayout oldBoard = new ChessBoardLayout();
         oldBoard.copyBoard(board);
         TeamColor color = board.getPiece(startPosition).getTeamColor();
         moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
@@ -180,7 +189,7 @@ public class AGame implements ChessGame {
 
     //CHANGED THIS
     @Override
-    public AChessBoard getBoard() {
+    public ChessBoardLayout getBoard() {
         return board;
     }
 }

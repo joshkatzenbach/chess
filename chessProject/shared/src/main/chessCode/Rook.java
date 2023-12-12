@@ -10,7 +10,7 @@ import static chess.ChessPiece.PieceType.ROOK;
 public class Rook implements ChessPiece {
 
     private final PieceType type = ROOK;
-    private ChessGame.TeamColor color;
+    private final ChessGame.TeamColor color;
 
     public Rook(ChessGame.TeamColor color) {
         this.color = color;

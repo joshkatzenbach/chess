@@ -15,12 +15,12 @@ public class TestFactory {
     //------------------------------------------------------------------------------------------------------------------
     public static ChessBoard getNewBoard(){
 
-        return new AChessBoard();
+        return new ChessBoardLayout();
     }
 
     public static ChessGame getNewGame(){
         // FIXME
-		return new AGame();
+		return new GameInstance();
     }
 
     public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){

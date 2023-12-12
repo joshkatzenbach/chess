@@ -47,8 +47,14 @@ public class Move implements ChessMove {
     @Override
     public String toString() {
         String output = "";
-        output += "Start: " + startPosition.toString() + '\n';
-        output += "End:   " + endPosition.toString() + '\n';
+
+
+        output += (char) (startPosition.getColumn() + 'a' - 1);
+        output += (char) (startPosition.getRow() + 48);
+        output += " -> ";
+        output += (char) (endPosition.getColumn()  + 'a' - 1);
+        output += (char) (endPosition.getRow() + 48);
+        output += "\n";
         return output;
     }
 }

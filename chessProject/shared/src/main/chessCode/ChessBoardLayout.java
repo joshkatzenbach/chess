@@ -6,13 +6,12 @@ import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
 import static chess.ChessPiece.PieceType.*;
 
-public class AChessBoard implements ChessBoard {
+public class ChessBoardLayout implements ChessBoard {
 
     ChessPiece[][] squares;
 
-    public AChessBoard() {
+    public ChessBoardLayout() {
         squares = new ChessPiece[8][8];
-        resetBoard();
     }
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
@@ -74,7 +73,7 @@ public class AChessBoard implements ChessBoard {
         squares[7][3] = new Queen(BLACK);
     }
 
-    @Override
+
     public void copyBoard(ChessBoard board) {
         ChessSquare square;
         for (int row = 1; row <= 8; row++) {

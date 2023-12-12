@@ -9,7 +9,7 @@ import static chess.ChessPiece.PieceType.KING;
 
 public class King implements ChessPiece {
 
-    private ChessGame.TeamColor color;
+    private final ChessGame.TeamColor color;
     private final PieceType type = KING;
 
     public King(ChessGame.TeamColor color) {
